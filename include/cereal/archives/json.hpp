@@ -94,6 +94,7 @@ namespace cereal
       \ingroup Archives */
   class JSONOutputArchive : public OutputArchive<JSONOutputArchive>, public traits::TextArchive
   {
+  protected:
     enum class NodeType { StartObject, InObject, StartArray, InArray };
 
     using WriteStream = rapidjson::OStreamWrapper;
@@ -248,7 +249,7 @@ namespace cereal
       //! Saves a nullptr to the current node
       void saveValue(std::nullptr_t)        { itsWriter.Null();                                                          }
 
-    private:
+    protected:
       // Some compilers/OS have difficulty disambiguating the above for various flavors of longs, so we provide
       // special overloads to handle these cases.
 
@@ -357,7 +358,7 @@ namespace cereal
 
       //! @}
 
-    private:
+    protected:
       WriteStream itsWriteStream;          //!< Rapidjson write stream
       JSONWriter itsWriter;                //!< Rapidjson writer
       char const * itsNextName;            //!< The next name
@@ -405,7 +406,7 @@ namespace cereal
       \ingroup Archives */
   class JSONInputArchive : public InputArchive<JSONInputArchive>, public traits::TextArchive
   {
-    private:
+    protected:
       using ReadStream = rapidjson::IStreamWrapper;
       typedef rapidjson::GenericValue<rapidjson::UTF8<>> JSONValue;
       typedef JSONValue::ConstMemberIterator MemberIterator;
@@ -454,7 +455,7 @@ namespace cereal
         itsNextName = nullptr;
       };
 
-    private:
+    protected:
       //! @}
       /*! @name Internal Functionality
           Functionality designed for use by those requiring control over the inner mechanisms of
@@ -506,7 +507,7 @@ namespace cereal
 
           //! Adjust our position such that we are at the node with the given name
           /*! @throws Exception if no such named node exists */
-          inline void search( const char * searchName )
+          inline bool search( const char * searchName, bool isOptional)
           {
             const auto len = std::strlen( searchName );
             size_t index = 0;
@@ -517,10 +518,13 @@ namespace cereal
                   ( std::strlen( currentName ) == len ) )
               {
                 itsIndex = index;
-                return;
+                return true;
               }
             }
-
+            if(isOptional)
+            {
+                return false;
+            }
             throw Exception("JSON Parsing failed - provided NVP (" + std::string(searchName) + ") not found");
           }
 
@@ -549,8 +553,14 @@ namespace cereal
           auto const actualName = itsIteratorStack.back().name();
 
           // Do a search if we don't see a name coming up, or if the names don't match
-          if( !actualName || std::strcmp( itsNextName, actualName ) != 0 )
-            itsIteratorStack.back().search( itsNextName );
+          if (!actualName || std::strcmp(itsNextName, actualName) != 0) {
+              bool nameFound = itsIteratorStack.back().search(itsNextName, itsNextOptional);
+              if (!nameFound && itsNextOptional) {
+                  itsLoadOptional = true;
+                  
+              }
+              
+          }
         }
 
         itsNextName = nullptr;
@@ -592,9 +602,16 @@ namespace cereal
       }
 
       //! Sets the name for the next node created with startNode
-      void setNextName( const char * name )
+      void setNext( const char * name, bool optional)
       {
         itsNextName = name;
+        itsNextOptional = false;
+        itsLoadOptional = optional;
+      }
+      //! Gets the flag indicating to load optional value
+      bool getLoadOptional()
+      {
+        return itsLoadOptional;
       }
 
       //! Loads a value from the current node - small signed overload
@@ -675,7 +692,7 @@ namespace cereal
       loadValue( T & t ){ loadLong(t); }
       #endif // _MSC_VER
 
-    private:
+    protected:
       //! Convert a string to a long long
       void stringToNumber( std::string const & str, long long & val ) { val = std::stoll( str ); }
       //! Convert a string to an unsigned long long
@@ -709,8 +726,10 @@ namespace cereal
 
       //! @}
 
-    private:
+    protected:
       const char * itsNextName;               //!< Next name set by NVP
+      bool         itsLoadOptional;
+      bool         itsNextOptional;
       ReadStream itsReadStream;               //!< Rapidjson write stream
       std::vector<Iterator> itsIteratorStack; //!< 'Stack' of rapidJSON iterators
       rapidjson::Document itsDocument;        //!< Rapidjson document
@@ -744,6 +763,31 @@ namespace cereal
   template <class T> inline
   void epilogue( JSONInputArchive &, NameValuePair<T> const & )
   { }
+
+  //! Prologue for NVPs for JSON output archives
+  /*! NVPs do not start or finish nodes - they just set up the names */
+  template <class T> inline
+  void prologue(JSONOutputArchive &, OptionalNameValuePair<T> const &)
+  { }
+  
+  //! Prologue for NVPs for JSON input archives
+  template <class T> inline
+  void prologue(JSONInputArchive &, OptionalNameValuePair<T> const &)
+  { }
+  
+  // ######################################################################
+  //! Epilogue for NVPs for JSON output archives
+  /*! NVPs do not start or finish nodes - they just set up the names */
+  template <class T> inline
+  void epilogue(JSONOutputArchive &, OptionalNameValuePair<T> const &)
+  { }
+  
+  //! Epilogue for NVPs for JSON input archives
+  template <class T> inline
+  void epilogue(JSONInputArchive &, OptionalNameValuePair<T> const &)
+  { }
+
+  // ######################################################################
 
   // ######################################################################
   //! Prologue for SizeTags for JSON archives
@@ -903,8 +947,20 @@ namespace cereal
   template <class T> inline
   void CEREAL_LOAD_FUNCTION_NAME( JSONInputArchive & ar, NameValuePair<T> & t )
   {
-    ar.setNextName( t.name );
+    ar.setNext( t.name, false);
     ar( t.value );
+  }
+
+//! Serializing optional NVP types to JSON
+  template <class T> inline
+  void CEREAL_LOAD_FUNCTION_NAME(JSONInputArchive & ar, OptionalNameValuePair<T> & t)
+  {
+    ar.setNext(t.name, true);
+    ar(t.value);
+    if (ar.getLoadOptional()) 
+    {
+      t.value = t.defaultValue;
+    }
   }
 
   //! Saving for nullptr to JSON
