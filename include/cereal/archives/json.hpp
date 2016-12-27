@@ -638,15 +638,15 @@ namespace cereal
       }
 
       //! Loads a value from the current node - bool overload
-      void loadValue(bool & val)        { search(); val = itsIteratorStack.back().value().GetBool(); ++itsIteratorStack.back(); }
+      virtual void loadValue(bool & val)        { search(); val = itsIteratorStack.back().value().GetBool(); ++itsIteratorStack.back(); }
       //! Loads a value from the current node - int64 overload
-      void loadValue(int64_t & val)     { search(); val = itsIteratorStack.back().value().GetInt64(); ++itsIteratorStack.back(); }
+      virtual void loadValue(int64_t & val)     { search(); val = itsIteratorStack.back().value().GetInt64(); ++itsIteratorStack.back(); }
       //! Loads a value from the current node - uint64 overload
-      void loadValue(uint64_t & val)    { search(); val = itsIteratorStack.back().value().GetUint64(); ++itsIteratorStack.back(); }
+      virtual void loadValue(uint64_t & val)    { search(); val = itsIteratorStack.back().value().GetUint64(); ++itsIteratorStack.back(); }
       //! Loads a value from the current node - float overload
-      void loadValue(float & val)       { search(); val = static_cast<float>(itsIteratorStack.back().value().GetDouble()); ++itsIteratorStack.back(); }
+      virtual void loadValue(float & val)       { search(); val = static_cast<float>(itsIteratorStack.back().value().GetDouble()); ++itsIteratorStack.back(); }
       //! Loads a value from the current node - double overload
-      void loadValue(double & val)      { search(); val = itsIteratorStack.back().value().GetDouble(); ++itsIteratorStack.back(); }
+      virtual void loadValue(double & val)      { search(); val = itsIteratorStack.back().value().GetDouble(); ++itsIteratorStack.back(); }
       //! Loads a value from the current node - string overload
       virtual void loadValue(std::string & val) { search(); val = itsIteratorStack.back().value().GetString(); ++itsIteratorStack.back(); }
       //! Loads a nullptr from the current node
