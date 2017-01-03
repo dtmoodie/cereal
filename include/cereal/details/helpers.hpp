@@ -172,9 +172,11 @@ namespace cereal
      OptionalNameValuePair(char const* name, T&& value, V const& defaultValue_)
         : NameValuePair<T>(name, std::forward<T>(value))
         , defaultValue(defaultValue_)
+        , success(true)
      {}
 
      typename std::remove_reference<T>::type defaultValue{};
+     bool success;
   };
 
   //! A specialization of make_nvp<> that simply forwards the value for binary archives

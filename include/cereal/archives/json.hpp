@@ -605,8 +605,8 @@ namespace cereal
       void setNext( const char * name, bool optional)
       {
         itsNextName = name;
-        itsNextOptional = false;
-        itsLoadOptional = optional;
+        itsNextOptional = optional;
+        itsLoadOptional = false;
       }
       //! Gets the flag indicating to load optional value
       bool getLoadOptional()
@@ -960,6 +960,7 @@ namespace cereal
     if (ar.getLoadOptional()) 
     {
       t.value = t.defaultValue;
+      t.success = false;
     }
   }
 
