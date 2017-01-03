@@ -68,7 +68,7 @@ namespace cereal
   template <class T>
   OptionalNameValuePair<T> make_optional_nvp(std::string const& name, T&& value)
   {
-     static std::remove_reference_t<T> const defaultValue{};
+     static typename std::remove_reference<T>::type const defaultValue{};
      return{name.c_str(), std::forward<T>(value), defaultValue};
   }
 
@@ -82,7 +82,7 @@ namespace cereal
   template <class T>
   OptionalNameValuePair<T> make_optional_nvp(char const* name, T&& value)
   {
-     static std::remove_reference_t<T> const defaultValue{};
+     static typename std::remove_reference<T>::type const defaultValue{};
      return{name, std::forward<T>(value), defaultValue};
   }
 

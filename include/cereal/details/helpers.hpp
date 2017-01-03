@@ -174,7 +174,7 @@ namespace cereal
         , defaultValue(defaultValue_)
      {}
 
-     std::remove_reference_t<T> defaultValue{};
+     typename std::remove_reference<T>::type defaultValue{};
   };
 
   //! A specialization of make_nvp<> that simply forwards the value for binary archives
