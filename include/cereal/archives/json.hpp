@@ -500,9 +500,9 @@ namespace cereal
           const char * name() const
           {
             if( itsType == Member && (itsMemberItBegin + itsIndex) != itsMemberItEnd )
-              return itsMemberItBegin[itsIndex].name.GetString();
-            else
-              return nullptr;
+                if(itsMemberItBegin[itsIndex].name.IsString())
+                    return itsMemberItBegin[itsIndex].name.GetString();
+           return nullptr;
           }
 
           //! Adjust our position such that we are at the node with the given name
@@ -544,7 +544,7 @@ namespace cereal
           Resets the NVP name after called.
 
           @throws Exception if an expectedName is given and not found */
-      inline void search()
+      virtual bool search()
       {
         // The name an NVP provided with setNextName()
         if( itsNextName )
@@ -564,6 +564,7 @@ namespace cereal
         }
 
         itsNextName = nullptr;
+        return true;
       }
 
     public:
@@ -619,10 +620,11 @@ namespace cereal
                                           sizeof(T) < sizeof(int64_t)> = traits::sfinae> inline
       void loadValue(T & val)
       {
-        search();
-
-        val = static_cast<T>( itsIteratorStack.back().value().GetInt() );
-        ++itsIteratorStack.back();
+        if(search())
+        {
+            val = static_cast<T>( itsIteratorStack.back().value().GetInt() );
+            ++itsIteratorStack.back();
+        }
       }
 
       //! Loads a value from the current node - small unsigned overload
