@@ -534,7 +534,7 @@ namespace cereal
           size_t itsIndex;                                 //!< The current index of this iterator
           enum Type {Value, Member, Null_} itsType;    //!< Whether this holds values (array) or members (objects) or nothing
       };
-
+      public:
       //! Searches for the expectedName node if it doesn't match the actualName
       /*! This needs to be called before every load or node start occurs.  This function will
           check to see if an NVP has been provided (with setNextName) and if so, see if that name matches the actual
@@ -567,7 +567,7 @@ namespace cereal
         return true;
       }
 
-    public:
+
       //! Starts a new node, going into its proper iterator
       /*! This places an iterator for the next node to be parsed onto the iterator stack.  If the next
           node is an array, this will be a value iterator, otherwise it will be a member iterator.
@@ -620,11 +620,10 @@ namespace cereal
                                           sizeof(T) < sizeof(int64_t)> = traits::sfinae> inline
       void loadValue(T & val)
       {
-        if(search())
-        {
-            val = static_cast<T>( itsIteratorStack.back().value().GetInt() );
-            ++itsIteratorStack.back();
-        }
+        search();
+        if(itsLoadOptional) return;
+        val = static_cast<T>( itsIteratorStack.back().value().GetInt() );
+        ++itsIteratorStack.back();
       }
 
       //! Loads a value from the current node - small unsigned overload
@@ -634,25 +633,25 @@ namespace cereal
       void loadValue(T & val)
       {
         search();
-
+        if(itsLoadOptional) return;
         val = static_cast<T>( itsIteratorStack.back().value().GetUint() );
         ++itsIteratorStack.back();
       }
 
       //! Loads a value from the current node - bool overload
-      virtual void loadValue(bool & val)        { search(); val = itsIteratorStack.back().value().GetBool(); ++itsIteratorStack.back(); }
+      virtual void loadValue(bool & val)        { search(); if(itsLoadOptional) return; val = itsIteratorStack.back().value().GetBool(); ++itsIteratorStack.back(); }
       //! Loads a value from the current node - int64 overload
-      virtual void loadValue(int64_t & val)     { search(); val = itsIteratorStack.back().value().GetInt64(); ++itsIteratorStack.back(); }
+      virtual void loadValue(int64_t & val)     { search(); if(itsLoadOptional) return; val = itsIteratorStack.back().value().GetInt64(); ++itsIteratorStack.back(); }
       //! Loads a value from the current node - uint64 overload
-      virtual void loadValue(uint64_t & val)    { search(); val = itsIteratorStack.back().value().GetUint64(); ++itsIteratorStack.back(); }
+      virtual void loadValue(uint64_t & val)    { search(); if(itsLoadOptional) return; val = itsIteratorStack.back().value().GetUint64(); ++itsIteratorStack.back(); }
       //! Loads a value from the current node - float overload
-      virtual void loadValue(float & val)       { search(); val = static_cast<float>(itsIteratorStack.back().value().GetDouble()); ++itsIteratorStack.back(); }
+      virtual void loadValue(float & val)       { search(); if(itsLoadOptional) return; val = static_cast<float>(itsIteratorStack.back().value().GetDouble()); ++itsIteratorStack.back(); }
       //! Loads a value from the current node - double overload
-      virtual void loadValue(double & val)      { search(); val = itsIteratorStack.back().value().GetDouble(); ++itsIteratorStack.back(); }
+      virtual void loadValue(double & val)      { search(); if(itsLoadOptional) return; val = itsIteratorStack.back().value().GetDouble(); ++itsIteratorStack.back(); }
       //! Loads a value from the current node - string overload
-      virtual void loadValue(std::string & val) { search(); val = itsIteratorStack.back().value().GetString(); ++itsIteratorStack.back(); }
+      virtual void loadValue(std::string & val) { search(); if(itsLoadOptional) return; val = itsIteratorStack.back().value().GetString(); ++itsIteratorStack.back(); }
       //! Loads a nullptr from the current node
-      void loadValue(std::nullptr_t&)   { search(); CEREAL_RAPIDJSON_ASSERT(itsIteratorStack.back().value().IsNull()); ++itsIteratorStack.back(); }
+      void loadValue(std::nullptr_t&)   { search(); if(itsLoadOptional) return; CEREAL_RAPIDJSON_ASSERT(itsIteratorStack.back().value().IsNull()); ++itsIteratorStack.back(); }
 
       // Special cases to handle various flavors of long, which tend to conflict with
       // the int32_t or int64_t on various compiler/OS combinations.  MSVC doesn't need any of this.
@@ -958,11 +957,14 @@ namespace cereal
   void CEREAL_LOAD_FUNCTION_NAME(JSONInputArchive & ar, OptionalNameValuePair<T> & t)
   {
     ar.setNext(t.name, true);
-    ar(t.value);
-    if (ar.getLoadOptional()) 
+    if(ar.search())
     {
-      t.value = t.defaultValue;
-      t.success = false;
+        ar.setNext(t.name, true);
+        ar(t.value);
+    }else
+    {
+        t.value = t.defaultValue;
+        t.success = false;
     }
   }
 
