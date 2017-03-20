@@ -42,12 +42,12 @@ namespace cereal
       bool initFlag = (bool)optional;
       if (initFlag)
       {
-         ar(_CEREAL_NVP("initialized", true));
-         ar(_CEREAL_NVP("value", optional.get()));
+         ar(cereal::make_nvp("initialized", true));
+         ar(cereal::make_nvp("value", optional.get()));
       }
       else
       {
-         ar(_CEREAL_NVP("initialized", false));
+         ar(cereal::make_nvp("initialized", false));
       }
    }
 
@@ -57,11 +57,11 @@ namespace cereal
    {
 
       bool initFlag;
-      ar(_CEREAL_NVP("initialized", initFlag));
+      ar(cereal::make_nvp("initialized", initFlag));
       if (initFlag)
       {
          Optioned val;
-         ar(_CEREAL_NVP("value", val));
+         ar(cereal::make_nvp("value", val));
          optional = val;
       }
       else
