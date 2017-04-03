@@ -29,25 +29,32 @@
 
 #include <cereal/types/memory.hpp>
 #include <cereal/types/array.hpp>
-#include <cereal/types/valarray.hpp>
-#include <cereal/types/vector.hpp>
+#include <cereal/types/bitset.hpp>
+#include <cereal/types/boost/circular_buffer.hpp>
+#include <cereal/types/boost/compressed_pair.hpp>
+#include <cereal/types/boost/dynamic_bitset.hpp>
+#include <cereal/types/boost/filesystem.hpp>
+//#include <cereal/types/boost/flyweight.hpp>
+#include <cereal/types/boost/optional.hpp>
+
+#include <cereal/types/boost_variant.hpp>
+#include <cereal/types/complex.hpp>
+#include <cereal/types/chrono.hpp>
 #include <cereal/types/deque.hpp>
 #include <cereal/types/forward_list.hpp>
 #include <cereal/types/list.hpp>
-#include <cereal/types/string.hpp>
-#include <cereal/types/map.hpp>
 #include <cereal/types/queue.hpp>
+#include <cereal/types/map.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/polymorphic.hpp>
 #include <cereal/types/set.hpp>
 #include <cereal/types/stack.hpp>
+#include <cereal/types/string.hpp>
+#include <cereal/types/tuple.hpp>
 #include <cereal/types/unordered_map.hpp>
 #include <cereal/types/unordered_set.hpp>
 #include <cereal/types/utility.hpp>
-#include <cereal/types/tuple.hpp>
-#include <cereal/types/bitset.hpp>
-#include <cereal/types/complex.hpp>
-#include <cereal/types/chrono.hpp>
-#include <cereal/types/polymorphic.hpp>
-#include <cereal/types/boost_variant.hpp>
+#include <cereal/types/vector.hpp>
 
 #include <cereal/archives/binary.hpp>
 #include <cereal/archives/portable_binary.hpp>
@@ -55,30 +62,6 @@
 #include <cereal/archives/json.hpp>
 #include <limits>
 #include <random>
-
-#include <boost/version.hpp>
-#if BOOST_VERSION >= 105900
-#include <boost/test/tools/detail/print_helper.hpp>
-
-namespace boost
-{
-  namespace test_tools
-  {
-    namespace tt_detail
-    {
-      template <class F, class S>
-      struct print_log_value< ::std::pair<F, S> >
-      {
-        void operator()(::std::ostream & os, ::std::pair<F, S> const & p )
-        {
-          os << "([" << p.first << "], [" << p.second << "])";
-        }
-      };
-    }
-  }
-}
-
-#endif // appropriate boost version
 
 namespace boost
 {
@@ -88,6 +71,14 @@ namespace boost
     os << "([" << p.first << "], [" << p.second << "])";
     return os;
   }
+}
+
+
+namespace cereal
+{
+  template <class Archive, class T> inline
+    void serialize( Archive &, std::less<T> & )
+    { }
 }
 
 template<class T> inline
