@@ -178,7 +178,7 @@ namespace cereal
 
         auto base64string = base64::encode( reinterpret_cast<const unsigned char *>( data ), size );
         saveValue( base64string );
-      };
+      }
 
       //! @}
       /*! @name Internal Functionality
@@ -243,7 +243,7 @@ namespace cereal
       //! Saves a double to the current node
       void saveValue(double d)              { itsWriter.Double(d);                                                       }
       //! Saves a string to the current node
-      void saveValue(std::string const & s) { itsWriter.String(s.c_str(), static_cast<rapidjson::SizeType>( s.size() )); }
+      virtual void saveValue(std::string const & s) { itsWriter.String(s.c_str(), static_cast<rapidjson::SizeType>( s.size() )); }
       //! Saves a const char * to the current node
       void saveValue(char const * s)        { itsWriter.String(s);                                                       }
       //! Saves a nullptr to the current node
@@ -557,9 +557,9 @@ namespace cereal
               bool nameFound = itsIteratorStack.back().search(itsNextName, itsNextOptional);
               if (!nameFound && itsNextOptional) {
                   itsLoadOptional = true;
-                  
+
               }
-              
+
           }
         }
 
@@ -770,19 +770,19 @@ namespace cereal
   template <class T> inline
   void prologue(JSONOutputArchive &, OptionalNameValuePair<T> const &)
   { }
-  
+
   //! Prologue for NVPs for JSON input archives
   template <class T> inline
   void prologue(JSONInputArchive &, OptionalNameValuePair<T> const &)
   { }
-  
+
   // ######################################################################
   //! Epilogue for NVPs for JSON output archives
   /*! NVPs do not start or finish nodes - they just set up the names */
   template <class T> inline
   void epilogue(JSONOutputArchive &, OptionalNameValuePair<T> const &)
   { }
-  
+
   //! Epilogue for NVPs for JSON input archives
   template <class T> inline
   void epilogue(JSONInputArchive &, OptionalNameValuePair<T> const &)
