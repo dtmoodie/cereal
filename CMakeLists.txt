@@ -37,6 +37,7 @@ if(NOT CMAKE_VERSION VERSION_LESS 3.0)
     install(EXPORT cereal FILE cereal-config.cmake
         DESTINATION share/cmake/cereal)
     install(DIRECTORY include/cereal DESTINATION include)
+    export(TARGETS cereal FILE cerealTargets.cmake)
 endif()
 
 if(JUST_INSTALL_CEREAL)
