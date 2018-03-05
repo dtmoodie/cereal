@@ -717,7 +717,8 @@ namespace cereal
       }
 
       //! Loads the size for a SizeTag
-      void loadSize(size_type & size)
+      template<typename T>
+      void loadSize(T & size)
       {
         if (itsIteratorStack.size() == 1)
           size = itsDocument.Size();
