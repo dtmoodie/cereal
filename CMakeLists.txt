@@ -43,6 +43,7 @@ if(NOT CMAKE_VERSION VERSION_LESS 3.0)
     install(EXPORT cereal FILE cereal-config.cmake
         DESTINATION share/cmake/cereal)
     install(DIRECTORY include/cereal DESTINATION include)
+    export(TARGETS cereal FILE cereal-targets.cmake)
 endif()
 
 if(JUST_INSTALL_CEREAL)
@@ -57,7 +58,7 @@ find_package(Boost COMPONENTS serialization)
 if(Boost_FOUND)
   include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 endif(Boost_FOUND)
-  
+
 enable_testing()
 add_subdirectory(unittests)
 
