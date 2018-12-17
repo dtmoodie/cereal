@@ -310,7 +310,7 @@ namespace cereal
         if( id == itsSharedPointerMap.end() )
         {
           auto ptrId = itsCurrentPointerId++;
-          itsSharedPointerMap.insert( {addr, ptrId} );
+          itsSharedPointerMap.insert( std::pair<void const*, std::uint32_t>(addr, ptrId) );
           return ptrId | detail::msb_32bit; // mask MSB to be 1
         }
         else
@@ -331,7 +331,7 @@ namespace cereal
         if( id == itsPolymorphicTypeMap.end() )
         {
           auto polyId = itsCurrentPolymorphicTypeId++;
-          itsPolymorphicTypeMap.insert( {name, polyId} );
+          itsPolymorphicTypeMap.insert( std::pair<char const*, std::uint32_t>(name, polyId) );
           return polyId | detail::msb_32bit; // mask MSB to be 1
         }
         else
@@ -718,7 +718,7 @@ namespace cereal
       inline void registerPolymorphicName(std::uint32_t const id, std::string const & name)
       {
         std::uint32_t const stripped_id = id & ~detail::msb_32bit;
-        itsPolymorphicTypeMap.insert( {stripped_id, name} );
+        itsPolymorphicTypeMap.insert( std::pair<std::uint32_t, std::string>(stripped_id, name) );
       }
 
     private:
