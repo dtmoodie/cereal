@@ -214,7 +214,7 @@ namespace cereal
                                          const void *,
                                          void *>::type;
 
-    BinaryData( T && d, uint64_t s ) : data(std::forward<T>(d)), size(s) {}
+    BinaryData( PT && d, uint64_t s ) : data(std::forward<PT>(d)), size(s) {}
 
     PT data;       //!< pointer to beginning of data
     uint64_t size; //!< size in bytes
